@@ -44,4 +44,12 @@ public class ResourceConstraintTests
         Assert.IsTrue(constrainedTime > baselineTime,
             "Expected constrained profile to take a bit longer than baseline.");
     }
+
+    [TestCleanup]
+    public void ResetProcessorAffinity()
+    {
+        var process = System.Diagnostics.Process.GetCurrentProcess();
+        long fullMask = (1L << Environment.ProcessorCount) - 1;
+        process.ProcessorAffinity = (IntPtr)fullMask;
+    }
 }

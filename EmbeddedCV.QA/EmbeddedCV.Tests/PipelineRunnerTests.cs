@@ -14,6 +14,14 @@ public class PipelineRunnerTests
     private static string GetSampleImagePath(string fileName) =>
         Path.Combine(AppContext.BaseDirectory, "SampleData", fileName);
 
+    [TestInitialize]
+    public void ResetProcessorAffinity()
+    {
+        var process = System.Diagnostics.Process.GetCurrentProcess();
+        long fullMask = (1L << Environment.ProcessorCount) - 1;
+        process.ProcessorAffinity = (IntPtr)fullMask;
+    }
+
     [TestMethod]
     public void ProcessFrame_OnMultipleImages_LogsResultsAndSavesJson()
     {
