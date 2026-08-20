@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using EmbeddedCV.Core.Detection;
 using EmbeddedCV.Core.Logging;
+using EmbeddedCV.Core.Constraints;
 
 namespace EmbeddedCV.Core;
 /*
@@ -12,11 +13,13 @@ public class DetectionPipelineRunner
 {
     private readonly IDetector _detector;
     private readonly MetricsLogger _logger;
+    private readonly ResourceConstraintSimulator? _constraintSimulator;
 
-    public DetectionPipelineRunner(IDetector detector, MetricsLogger logger)
+    public DetectionPipelineRunner(IDetector detector, MetricsLogger logger, ResourceConstraintSimulator? constraintSimulator = null)
     {
         _detector = detector;
         _logger = logger;
+        _constraintSimulator = constraintSimulator;
     }
 
     public void ProcessFrames(string imagePath, int frameNumber)
@@ -31,6 +34,7 @@ public class DetectionPipelineRunner
         try
         {
             frameResult.Detections = _detector.DetectFrame(imagePath);
+            _constraintSimulator?.ApplySimulatedLatency();
         }
         catch (Exception ex)
         {
