@@ -1,4 +1,4 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
 using System.Text.Json;
 using EmbeddedCV.Core.Detection;
 
@@ -9,14 +9,15 @@ namespace EmbeddedCV.Core.Logging;
 
 public class MetricsLogger
 {
-    private readonly List<FrameResult> _frameResults = new();
+    private readonly ConcurrentBag<FrameResult> _frameResults = new();
 
     public void LogFrame(FrameResult frameResult)
     {
         _frameResults.Add(frameResult);
     }
 
-    public IReadOnlyList<FrameResult> GetAllResults() => _frameResults;
+    public IReadOnlyList<FrameResult> GetAllResults() => 
+        _frameResults.OrderBy(f => f.FrameNumber).ToList();
 
     /*
      * Writes all logged frame results to a JSON file for inspection/reporting.

@@ -48,4 +48,26 @@ public class DetectionPipelineRunner
 
         _logger.LogFrame(frameResult);
     }
+
+    /*
+     * Processes a batch of frames under a given load condition
+     * Baseline: sequential. Highload: concurrent, simulating high traffic
+    */
+    public void ProcessBatch(IReadOnlyList<string> imagePath, LoadCondition loadCondition)
+    {
+        if (loadCondition == LoadCondition.Baseline)
+        {
+            for (int i = 0; i < imagePath.Count; i++)
+            {
+                ProcessFrames(imagePath[i], frameNumber: i + 1);
+            }
+        }
+        else //High load
+        {
+            Parallel.For(0, imagePath.Count, i =>
+            {
+                ProcessFrames(imagePath[i], frameNumber: i + 1);
+            });
+        }
+    }
 }
