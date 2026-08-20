@@ -5,6 +5,10 @@ VisualStudioVersion = 17.14.37012.4 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddedCV.MAUI", "EmbeddedCV.MAUI\EmbeddedCV.MAUI.csproj", "{A562C5A1-2382-41A6-A0DA-49C6FDA6EDA1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddedCV.Tests", "EmbeddedCV.Tests\EmbeddedCV.Tests.csproj", "{7632AD70-C687-4EE7-ACCF-472541B9C56C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddedCV.Core", "EmbeddedCV.Core\EmbeddedCV.Core.csproj", "{5D93A8B8-8403-4397-BEDA-55AAF65E089F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,8 +17,17 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A562C5A1-2382-41A6-A0DA-49C6FDA6EDA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A562C5A1-2382-41A6-A0DA-49C6FDA6EDA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A562C5A1-2382-41A6-A0DA-49C6FDA6EDA1}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{A562C5A1-2382-41A6-A0DA-49C6FDA6EDA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A562C5A1-2382-41A6-A0DA-49C6FDA6EDA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7632AD70-C687-4EE7-ACCF-472541B9C56C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7632AD70-C687-4EE7-ACCF-472541B9C56C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7632AD70-C687-4EE7-ACCF-472541B9C56C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7632AD70-C687-4EE7-ACCF-472541B9C56C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D93A8B8-8403-4397-BEDA-55AAF65E089F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D93A8B8-8403-4397-BEDA-55AAF65E089F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D93A8B8-8403-4397-BEDA-55AAF65E089F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D93A8B8-8403-4397-BEDA-55AAF65E089F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
