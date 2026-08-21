@@ -15,16 +15,23 @@ public class OnnxYoloDetector : IDetector, IDisposable
 
     public OnnxYoloDetector(string modelPath)
     {
-        if(!File.Exists(modelPath))
+        if (!File.Exists(modelPath))
         {
             //Corresponds to FR-09: stop and log error if model cant be loaded
             throw new FileNotFoundException($"YOLO model not found at path: {modelPath}");
         }
-        _yolo = new Yolo(new YoloOptions
+        try
         {
-           // FIX: Use the correct CPU execution provider for YoloDotNet
-           ExecutionProvider = new CpuExecutionProvider(modelPath)
-        });
+            _yolo = new Yolo(new YoloOptions
+            {
+                // FIX: Use the correct CPU execution provider for YoloDotNet
+                ExecutionProvider = new CpuExecutionProvider(modelPath)
+            });
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to load YOLO model from '{modelPath}'. File may be corrupt or incompatible. Test run stopped. Details: {ex.Message}", ex);
+        }
     }
 
     public List<DetectionResult> DetectFrame(string imagePath)

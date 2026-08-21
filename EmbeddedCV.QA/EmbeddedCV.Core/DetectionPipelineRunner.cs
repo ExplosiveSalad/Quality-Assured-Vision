@@ -22,6 +22,19 @@ public class DetectionPipelineRunner
         _constraintSimulator = constraintSimulator;
     }
 
+    public static void ValidateInputPaths(IReadOnlyList<string> imagePath)
+    {
+        if (imagePath == null || imagePath.Count == 0)
+        {
+            throw new ArgumentException("No input frames provided. Test run stopped before starting.");
+        }
+        var missing = imagePath.Where(p => !File.Exists(p)).ToList();
+        if (missing.Count > 0)
+        {
+            throw new FileNotFoundException($"Test run rejected: {missing.Count} input file(s) not found: {string.Join(", ", missing)}");
+        }
+    }
+
     public void ProcessFrames(string imagePath, int frameNumber)
     {
         var stopwatch = Stopwatch.StartNew();
@@ -55,6 +68,7 @@ public class DetectionPipelineRunner
     */
     public void ProcessBatch(IReadOnlyList<string> imagePath, LoadCondition loadCondition)
     {
+        ValidateInputPaths(imagePath);
         if (loadCondition == LoadCondition.Baseline)
         {
             for (int i = 0; i < imagePath.Count; i++)

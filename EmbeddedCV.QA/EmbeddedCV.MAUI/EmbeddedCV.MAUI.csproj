@@ -64,4 +64,19 @@
 	  <ProjectReference Include="..\EmbeddedCV.Core\EmbeddedCV.Core.csproj" />
 	</ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\EmbeddedCV.Core\Assets\models\yolov8n.onnx">
+      <Link>Assets\models\yolov8n.onnx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\EmbeddedCV.Tests\SampleData\bus.jpg">
+      <Link>Assets\sample-data\bus.jpg</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\EmbeddedCV.Tests\SampleData\zidane.jpg">
+      <Link>Assets\sample-data\zidane.jpg</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
