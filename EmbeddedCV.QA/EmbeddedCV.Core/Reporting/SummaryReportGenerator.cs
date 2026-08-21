@@ -74,9 +74,9 @@ public class SummaryReportGenerator
             {
                 RequirementId = "NFR-09",
                 Description = "Cold-start latency (model load + first inference)",
-                Passed = coldStartLatencyMs.Value < 2000.0, //placeholder threshold - we adjust when we have more baseline data
+                Passed = coldStartLatencyMs.Value < 500.0, //not placeholder anymore, data has been analysed
                 ActualValue = $"{coldStartLatencyMs.Value:F2}ms",
-                Threshold = "<2000ms"
+                Threshold = "<500ms"
             });
         }
 
