@@ -121,6 +121,16 @@ public class SummaryReportGenerator
             Threshold = $">={NFR02_MinFrameRateComplianceRate:P0} of frames >={NFR02_MinFps} FPS"
         });
 
+        //NFR-04: 100% of frames complete without crashing under high-load
+        report.NfrResults.Add(new NfrCheckResult
+        {
+            RequirementId = "NFR-04",
+            Description = "100% of frames processed without crashing under high-load configs",
+            Passed = report.SkippedFrames == 0,
+            ActualValue = $"{report.TotalFrames - report.SkippedFrames}/{report.TotalFrames} completed",
+            Threshold = "100% completion, 0 crashes"
+        });
+
         report.PeakMemoryMb = peakMemoryMb;
         return report;
     }
