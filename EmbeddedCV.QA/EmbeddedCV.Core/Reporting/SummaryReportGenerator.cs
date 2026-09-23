@@ -97,7 +97,7 @@ public class SummaryReportGenerator
         report.NfrResults.Add(new NfrCheckResult
         {
             RequirementId = "NFR-08",
-            Description = "All frames processed or skipped without crashing",
+            Description = "All frames processed or skipped without crashing (runtime check - see TC-07/TC-09/TC-10 for per-condition validation)",
             Passed = true, //if we reach this point, the run completed without crashing
             ActualValue = $"{report.SkippedFrames} skipped / {report.TotalFrames} total",
             Threshold = "0 crashes"
