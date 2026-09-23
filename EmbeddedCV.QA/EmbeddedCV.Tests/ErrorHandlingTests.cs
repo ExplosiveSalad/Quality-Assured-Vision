@@ -44,4 +44,33 @@ public class ErrorHandlingTests
 
         File.Delete(corruptedPath); // Clean up the temporary corrupted file for the next run
     }
+
+    [TestMethod]
+    public void ProcessBatch_WithOneCorruptedFrame_SkipsItAndProcessesRemainingFrames()
+    {
+        //Arrange
+        var corruptedPath = Path.Combine(Path.GetTempPath(), "corrupted-test.jpg");
+        File.WriteAllText(corruptedPath, "this is not a real image file");
+
+        using var detector = new OnnxYoloDetector(Path.Combine(AppContext.BaseDirectory, "Assets", "models", "yolov8n.onnx"));
+        var logger = new MetricsLogger();
+        var runner = new DetectionPipelineRunner(detector, logger);
+
+        var imagePaths = new List<string>
+        {
+            corruptedPath,
+            Path.Combine(AppContext.BaseDirectory, "SampleData", "bus.jpg") 
+        };
+
+        //Act 
+        runner.ProcessBatch(imagePaths, EmbeddedCV.Core.Constraints.LoadCondition.Baseline);
+
+        //Assert
+        var results = logger.GetAllResults();
+        Assert.AreEqual(2, results.Count);
+        Assert.IsTrue(results.Any(r => r.WasSkipped), "Expected the corrupted frame to be skipped");
+        Assert.IsTrue(results.Any(r => !r.WasSkipped && r.Detections.Count > 0), "Expected the valid frame to still be processed properly");
+
+        File.Delete(corruptedPath); // Clean up the temporary corrupted file for the next run
+    }
 }
