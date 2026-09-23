@@ -29,6 +29,7 @@ public class SummaryReport
     public int TotalDetections { get; set; }
     public List<NfrCheckResult> NfrResults { get; set; } = new();
     public double? ColdStartLatencyMs { get; set; }
+    public double PeakMemoryMb { get; set; }
 }
 
 /* Generates a summary report from logged frame results, including
@@ -45,6 +46,8 @@ public class SummaryReportGenerator
     {
         var processedFrames = frameResults.Where(f => !f.WasSkipped).ToList();
         var latencies = processedFrames.Select(f => f.ProcessingTimeMs).ToList();
+        var peakMemoryBytes = processedFrames.Count > 0 ? processedFrames.Max(f => f.MemoryUsedBytes) : 0;
+        var peakMemoryMb = peakMemoryBytes / (1024.0 * 1024.0);
 
         var report = new SummaryReport
         {
@@ -56,6 +59,16 @@ public class SummaryReportGenerator
             TotalDetections = processedFrames.Sum(f => f.Detections.Count),
             ColdStartLatencyMs = coldStartLatencyMs
         };
+
+        //NFR-03: peak memory usage under 512MB
+        report.NfrResults.Add(new NfrCheckResult
+        {
+            RequirementId = "NFR-03",
+            Description = "Peak memory usage under 512MB during test runs",
+            Passed = peakMemoryMb < NFR03_MaxMemoryMb,
+            ActualValue = $"{peakMemoryMb:F2}MB",
+            Threshold = $"<{NFR03_MaxMemoryMb}MB"
+        });
 
         //NFR-01: Average frame processing time under 100ms
         report.NfrResults.Add(new NfrCheckResult
@@ -90,6 +103,7 @@ public class SummaryReportGenerator
             Threshold = "0 crashes"
         });
 
+        report.PeakMemoryMb = peakMemoryMb;
         return report;
     }
 }

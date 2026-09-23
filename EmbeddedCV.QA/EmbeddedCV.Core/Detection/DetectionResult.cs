@@ -24,5 +24,6 @@
         public List<DetectionResult> Detections { get; set; } = new();
         public bool WasSkipped { get; set; } = false;
         public string? SkippedReason { get; set; }
-    }
+        public long MemoryUsedBytes { get; set; } 
+}
 
