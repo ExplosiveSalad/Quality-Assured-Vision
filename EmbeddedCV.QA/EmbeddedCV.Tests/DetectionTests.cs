@@ -32,4 +32,28 @@ public class DetectionTests
             Console.WriteLine($"{r.Label} - {r.Confidence:P1} at ({r.X},{r.Y}) {r.Width}x{r.Height}");
         }
     }
+
+    [TestMethod]
+    public void DetectFrame_RunMultipleTimes_ProducesConsistentDetectionCounts()
+    {
+        using var detector = new OnnxYoloDetector(GetModelPath());
+        var imagePath = GetSampleImagePath("bus.jpg");
+        detector.DetectFrame(imagePath); // Warm-up
+
+        var detectionCounts = new List<int>();
+        for (int i = 0; i < 5; i++)
+        {
+            var results = detector.DetectFrame(imagePath);
+            detectionCounts.Add(results.Count);
+        }
+
+        Console.WriteLine($"Detection counts across 5 runs: {string.Join(", ", detectionCounts)}");
+
+        var maxCount = detectionCounts.Max();
+        var minCount = detectionCounts.Min();
+        var variance = maxCount > 0 ? (double)(maxCount - minCount) / maxCount : 0;
+
+        Console.WriteLine($"Variance: {variance:P1}");
+        Assert.IsTrue(variance <= 0.02, $"Expected detection count variance within 2%, got {variance:P1}");
+    }
 }
