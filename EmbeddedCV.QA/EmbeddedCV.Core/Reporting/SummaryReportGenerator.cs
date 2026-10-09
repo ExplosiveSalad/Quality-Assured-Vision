@@ -29,6 +29,7 @@ public class SummaryReport
     public int TotalDetections { get; set; }
     public List<NfrCheckResult> NfrResults { get; set; } = new();
     public double? ColdStartLatencyMs { get; set; }
+    public double PeakMemoryMb { get; set; }
 }
 
 /* Generates a summary report from logged frame results, including
@@ -39,12 +40,20 @@ public class SummaryReportGenerator
 {
     // Thresholds correspond to the rewritten, testable NFRs from Task 2.
     private const double NFR01_MaxLatencyMs = 100.0;
-    private const double NFR03_MaxMemoryMb = 512.0; //placeholder for now
+    private const double NFR03_MaxMemoryMb = 512.0; 
+    private const double NFR02_MinFps = 15.0;
+    private const double NFR02_MinFrameRateComplianceRate = 0.95; //95% of frames must meet the minimum frame rate requirement
 
     public SummaryReport Generate(IReadOnlyList<FrameResult> frameResults, double? coldStartLatencyMs = null)
     {
         var processedFrames = frameResults.Where(f => !f.WasSkipped).ToList();
         var latencies = processedFrames.Select(f => f.ProcessingTimeMs).ToList();
+        var peakMemoryBytes = processedFrames.Count > 0 ? processedFrames.Max(f => f.MemoryUsedBytes) : 0;
+        var peakMemoryMb = peakMemoryBytes / (1024.0 * 1024.0);
+        var framesFpsCompliant = latencies.Count(ms => (1000.0 / ms) >= NFR02_MinFps);
+        var fpsComplianceRate = latencies.Count > 0 ? (double)framesFpsCompliant / latencies.Count : 0;
+
+        
 
         var report = new SummaryReport
         {
@@ -56,6 +65,16 @@ public class SummaryReportGenerator
             TotalDetections = processedFrames.Sum(f => f.Detections.Count),
             ColdStartLatencyMs = coldStartLatencyMs
         };
+
+        //NFR-03: peak memory usage under 512MB
+        report.NfrResults.Add(new NfrCheckResult
+        {
+            RequirementId = "NFR-03",
+            Description = "Peak memory usage under 512MB during test runs",
+            Passed = peakMemoryMb < NFR03_MaxMemoryMb,
+            ActualValue = $"{peakMemoryMb:F2}MB",
+            Threshold = $"<{NFR03_MaxMemoryMb}MB"
+        });
 
         //NFR-01: Average frame processing time under 100ms
         report.NfrResults.Add(new NfrCheckResult
@@ -84,12 +103,35 @@ public class SummaryReportGenerator
         report.NfrResults.Add(new NfrCheckResult
         {
             RequirementId = "NFR-08",
-            Description = "All frames processed or skipped without crashing",
+            Description = "All frames processed or skipped without crashing (runtime check - see TC-07/TC-09/TC-10 for per-condition validation)",
             Passed = true, //if we reach this point, the run completed without crashing
             ActualValue = $"{report.SkippedFrames} skipped / {report.TotalFrames} total",
             Threshold = "0 crashes"
         });
 
+        //NFR-02: sustain min 15 FPS for at least 95% of frames
+        //FPS per frame is derived as 1000/ processingTimeMs, so we can check how many frames meet the minimum FPS requirement
+
+        report.NfrResults.Add(new NfrCheckResult
+        {
+            RequirementId = "NFR-02",
+            Description = "At least 95% of frames sustain minimum 15 FPS",
+            Passed = fpsComplianceRate >= NFR02_MinFrameRateComplianceRate,
+            ActualValue = $"{fpsComplianceRate:P1} of frames >= 15 FPS",
+            Threshold = $">={NFR02_MinFrameRateComplianceRate:P0} of frames >={NFR02_MinFps} FPS"
+        });
+
+        //NFR-04: 100% of frames complete without crashing under high-load
+        report.NfrResults.Add(new NfrCheckResult
+        {
+            RequirementId = "NFR-04",
+            Description = "100% of frames processed without crashing under high-load configs",
+            Passed = report.SkippedFrames == 0,
+            ActualValue = $"{report.TotalFrames - report.SkippedFrames}/{report.TotalFrames} completed",
+            Threshold = "100% completion, 0 crashes"
+        });
+
+        report.PeakMemoryMb = peakMemoryMb;
         return report;
     }
 }

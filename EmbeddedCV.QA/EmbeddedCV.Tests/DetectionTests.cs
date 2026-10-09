@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using EmbeddedCV.Core.Detection;
+using SkiaSharp;
 
 namespace EmbeddedCV.Tests;
 
@@ -31,5 +32,57 @@ public class DetectionTests
         {
             Console.WriteLine($"{r.Label} - {r.Confidence:P1} at ({r.X},{r.Y}) {r.Width}x{r.Height}");
         }
+    }
+
+    [TestMethod]
+    public void DetectFrame_RunMultipleTimes_ProducesConsistentDetectionCounts()
+    {
+        using var detector = new OnnxYoloDetector(GetModelPath());
+        var imagePath = GetSampleImagePath("bus.jpg");
+        detector.DetectFrame(imagePath); // Warm-up
+
+        var detectionCounts = new List<int>();
+        for (int i = 0; i < 5; i++)
+        {
+            var results = detector.DetectFrame(imagePath);
+            detectionCounts.Add(results.Count);
+        }
+
+        Console.WriteLine($"Detection counts across 5 runs: {string.Join(", ", detectionCounts)}");
+
+        var maxCount = detectionCounts.Max();
+        var minCount = detectionCounts.Min();
+        var variance = maxCount > 0 ? (double)(maxCount - minCount) / maxCount : 0;
+
+        Console.WriteLine($"Variance: {variance:P1}");
+        Assert.IsTrue(variance <= 0.02, $"Expected detection count variance within 2%, got {variance:P1}");
+    }
+
+    [TestMethod]
+    public void DetectFrame_OnBlankImage_ReturnsEmptyDetectionList()
+    {
+        //Arrange: create a blank solid color image (no detectable objects)
+        var blankImagePath = Path.Combine(Path.GetTempPath(), "blank-test.jpg");
+        using (var bitmap = new SKBitmap(640, 640))
+        {
+            using var canvas = new SKCanvas(bitmap);
+            canvas.Clear(SKColors.White);
+            using var image = SKImage.FromBitmap(bitmap);
+            using var data = image.Encode(SKEncodedImageFormat.Jpeg, 90);
+            using var stream = File.OpenWrite(blankImagePath);
+            data.SaveTo(stream);
+        }
+
+        using var detector = new OnnxYoloDetector(GetModelPath());
+
+        //Act
+        var results = detector.DetectFrame(blankImagePath);
+
+        //Assert 
+        Console.WriteLine($"Detections on blank image: {results.Count}");
+        Assert.IsNotNull(results);
+        Assert.AreEqual(0, results.Count, "Expected no detections on a blank image");
+
+        File.Delete(blankImagePath); // Clean up the temporary file
     }
 }

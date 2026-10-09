@@ -48,6 +48,7 @@ public class DetectionPipelineRunner
         {
             frameResult.Detections = _detector.DetectFrame(imagePath);
             _constraintSimulator?.ApplySimulatedLatency();
+            frameResult.MemoryUsedBytes = Process.GetCurrentProcess().WorkingSet64; //gives total process memory, not just the operation alloction
         }
         catch (Exception ex)
         {
